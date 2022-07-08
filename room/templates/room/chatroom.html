@@ -1,0 +1,123 @@
+{% extends "room/base.html" %}
+{% load static %}
+{% block content %}
+<div class="sketchy">
+<div class="d-flex justify-content-center border-dark">
+    <img class="logo" src="{%static 'enroll/images/chat.png'%}" alt="">
+
+</div>
+<div class="d-flex justify-content-center">
+    <div class="form-group row">
+    <h2>{{room}} Well Come to Our Chat</h2>
+    </div>
+</div>
+</div>
+ <div class="sketchy">  
+<div id="display" >
+
+   
+    
+
+</div>
+    
+    <script>
+    $(document).ready(function(){
+    
+    setInterval(function(){
+        $.ajax({
+            type: 'GET',
+            url : "/getMessages/{{room}}/",
+            success: function(response){
+                console.log(response);
+                $("#display").empty();
+                for (var key in response.messages)
+                {
+                    var temp="<div class='container darker'><b>"+response.messages[key].user+"</b><p>"+response.messages[key].value+"</p><span class='time-left'>"+response.messages[key].date+"</span></div>";
+                    $("#display").append(temp);
+                }
+            },
+            error: function(response){
+                alert('An error occured')
+            }
+        });
+    },1000);
+    })
+    </script>
+</div>  
+
+
+<style>
+
+.sketchy {
+    padding: 4rem 8rem;
+    display: inline-block;
+    border: 3px solid #333333;
+    font-size: 2.5rem;
+    border-radius: 2% 6% 5% 4% / 1% 1% 2% 4%;
+    text-transform: uppercase;
+    letter-spacing: 0.3ch;
+    background: #ffffff;
+    position: relative;
+}
+    
+    sketchy::before {
+        content: '';
+        border: 2px solid #353535;
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate3d(-50%, -50%, 0) scale(1.015) rotate(0.5deg);
+        border-radius: 1% 1% 2% 4% / 2% 6% 5% 4%;
+    }
+
+
+
+</style>
+
+<div class="d-flex justify-content-center">  
+<div class="display">
+    <div class="container">
+        <span class="time-left"></span>
+    </div>
+    <form id="post-form">
+        {% csrf_token %}
+        <div class="form-group row mt-8">
+        <input type="hidden" name="username" id="username" value="{{username}}"/>
+        <input type="hidden" name="room_id" id="room_id" value="{{room_details.id}}"/>
+        <input class="mt-2 col-md-18 form-control" type="text" name="message" id="message" width="900px" />
+        </div>
+        <div class="form-group row col-md-12">
+        <input class="btn btn-primary btn-lg btn-block" type="submit" value="Send">
+        </div>
+    </form>
+
+</div>
+</div>
+
+<script type="text/javascript">
+    $(document).on('submit','#post-form',function(e){
+      e.preventDefault();
+  
+      $.ajax({
+        type:'POST',
+        url:'/send',
+        data:{
+            username:$('#username').val(),
+            room_id:$('#room_id').val(),
+            message:$('#message').val(),
+          csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data){
+           
+        }
+      });
+      document.getElementById('message').value = ''
+    });
+  </script>
+
+
+
+{% endblock content %}
